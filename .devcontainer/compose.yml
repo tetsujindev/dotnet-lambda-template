@@ -1,0 +1,10 @@
+version: '3'
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/dotnet:dev-8.0-bookworm
+    volumes:
+      - ..:/workspace:cached
+      - ~/.aws:/home/vscode/.aws
+    command: sleep infinity
+    working_dir: /workspace # この行は無くても動く
+    user: vscode
