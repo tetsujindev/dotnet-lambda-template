@@ -1,22 +1,28 @@
 provider "aws" {
-  region = "ap-northeast-1"  
+  region = "ap-northeast-1"
 }
 
 resource "null_resource" "lambda_build" {
   triggers = {
-    always_run = "${timestamp()}"
+    md5 = "${md5(file("../src/Lambda/StudentLambda/src/StudentLambda/Function.cs"))}"
   }
 
   provisioner "local-exec" {
-    command = "dotnet lambda package --project-location ../src/Lambda/HelloLambda/src/HelloLambda/ --output-package ../src/Lambda/HelloLambda/src/HelloLambda/bin/HelloLambda.zip"
+    command = "dotnet lambda package --project-location ../src/Lambda/StudentLambda/src/StudentLambda/ --output-package ../src/Lambda/StudentLambda/src/StudentLambda/bin/StudentLambda.zip"
   }
 }
 
-resource "aws_lambda_function" "hello_function" {
-  filename         = "../src/Lambda/HelloLambda/src/HelloLambda/bin/HelloLambda.zip"
-  function_name    = "HelloLambda"
+data "local_file" "StudentLambda" {
+  filename   = "../src/Lambda/StudentLambda/src/StudentLambda/bin/StudentLambda.zip"
+  depends_on = [null_resource.lambda_build]
+}
+
+resource "aws_lambda_function" "student_function" {
+  filename         = data.local_file.StudentLambda.filename
+  source_code_hash = data.local_file.StudentLambda.content_base64sha256
+  function_name    = "StudentLambda"
   role             = "arn:aws:iam::194722443726:role/lambda-administrator-role"
-  handler          = "HelloLambda::HelloLambda.Function::FunctionHandler"
+  handler          = "StudentLambda::StudentLambda.Function::FunctionHandler"
   runtime          = "dotnet8"
-  depends_on = [ null_resource.lambda_build ]
+  depends_on       = [null_resource.lambda_build]
 }
