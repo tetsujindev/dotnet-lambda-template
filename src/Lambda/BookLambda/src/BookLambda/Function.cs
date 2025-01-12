@@ -1,21 +1,38 @@
+using System.Text.Json;
+using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
+using Infrastructure.Data;
+using Infrastructure.Services;
 
-// Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
 namespace BookLambda;
 
 public class Function
 {
-    
-    /// <summary>
-    /// A simple function that takes a string and does a ToUpper
-    /// </summary>
-    /// <param name="input">The event for the Lambda function handler to process.</param>
-    /// <param name="context">The ILambdaContext that provides methods for logging and describing the Lambda environment.</param>
-    /// <returns></returns>
+    private readonly SecretsManagerService secretsManagerService;
+    private readonly BookRepository bookRepository;
+
+    public Function()
+    {
+        secretsManagerService = new SecretsManagerService();
+        //bookRepository = new BookRepository(secretsManagerService.GetSecretAsync<string>("connectionstring").Result);
+        bookRepository = new BookRepository(Environment.GetEnvironmentVariable("connectionstring")!);
+    }
+
     public string FunctionHandler(string input, ILambdaContext context)
     {
         return input.ToUpper();
+    }
+
+    public async Task<APIGatewayProxyResponse> GetBooks(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        var books = await bookRepository.GetBooksAsync();
+        return new APIGatewayProxyResponse
+        {
+            Body = JsonSerializer.Serialize(books),
+            StatusCode = 200,
+            Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+        };
     }
 }
