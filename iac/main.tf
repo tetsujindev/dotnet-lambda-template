@@ -88,6 +88,22 @@ resource "aws_db_instance" "tfer--db-instance-postgresql" {
   password = var.db_password
 }
 
+resource "aws_secretsmanager_secret" "hoge_secrets" {
+    name = "terraform-secrets"
+    recovery_window_in_days = 7
+}
+
+variable "db_connectionstring" {
+  type      = string
+  sensitive = true
+}
+
+resource "aws_secretsmanager_secret_version" "hoge_secrets_detail" {
+    secret_id = aws_secretsmanager_secret.hoge_secrets.id
+    version_stages = ["AWSCURRENT"]
+    secret_string = var.db_connectionstring
+}
+
 /*
 resource "null_resource" "lambda_build" {
   triggers = {
