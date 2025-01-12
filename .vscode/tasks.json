@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "command": "dotnet",
+  "args": [],
+  "tasks": [
+    {
+      "label": "build packages",
+      "args": ["build", "${workspaceFolder}"],
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
