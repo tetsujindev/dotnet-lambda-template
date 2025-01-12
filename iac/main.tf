@@ -30,9 +30,42 @@ data "aws_subnets" "default" {
   }
 }
 
+/*
 data "aws_security_group" "default" {
   name = "default"
 }
+*/
+
+resource "aws_security_group" "rds_sg" {
+  description = "security group for rds"
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "0"
+    protocol    = "-1"
+    self        = "false"
+    to_port     = "0"
+  }
+
+  ingress {
+    cidr_blocks = ["106.73.23.33/32"]
+    from_port   = "5432"
+    protocol    = "tcp"
+    self        = "false"
+    to_port     = "5432"
+  }
+
+  ingress {
+    from_port = "0"
+    protocol  = "-1"
+    self      = "true"
+    to_port   = "0"
+  }
+
+  name   = "rds_sg"
+  vpc_id = data.aws_vpc.default.id
+}
+
 
 resource "aws_db_subnet_group" "default" {
   name       = "default-db-subnet-group"
@@ -77,56 +110,69 @@ resource "aws_db_instance" "tfer--db-instance-postgresql" {
   //performance_insights_kms_key_id       = "arn:aws:kms:ap-northeast-1:194722443726:key/cab8aa98-c4a2-4ae1-9d72-5984004f6de2"
   performance_insights_retention_period = "7"
   port                                  = "5432"
-  publicly_accessible                   = "false"
+  publicly_accessible                   = "true"
   storage_encrypted                     = "true"
   storage_throughput                    = "0"
   storage_type                          = "gp2"
   username                              = "postgres"
-  vpc_security_group_ids                = [data.aws_security_group.default.id]
+  vpc_security_group_ids                = [aws_security_group.rds_sg.id]
   skip_final_snapshot                   = true
 
   password = var.db_password
 }
 
+/*
 resource "aws_secretsmanager_secret" "hoge_secrets" {
-    name = "terraform-secrets"
-    recovery_window_in_days = 7
+  name                    = "terraform-secrets"
+  recovery_window_in_days = 7
 }
-
+*/
 variable "db_connectionstring" {
   type      = string
   sensitive = true
 }
-
-resource "aws_secretsmanager_secret_version" "hoge_secrets_detail" {
-    secret_id = aws_secretsmanager_secret.hoge_secrets.id
-    version_stages = ["AWSCURRENT"]
-    secret_string = var.db_connectionstring
-}
-
 /*
-resource "null_resource" "lambda_build" {
+resource "aws_secretsmanager_secret_version" "hoge_secrets_detail" {
+  secret_id      = aws_secretsmanager_secret.hoge_secrets.id
+  version_stages = ["AWSCURRENT"]
+  secret_string  = var.db_connectionstring
+}
+*/
+resource "null_resource" "package_book_lambda" {
   triggers = {
-    md5 = "${md5(file("../src/Lambda/StudentLambda/src/StudentLambda/Function.cs"))}"
+    md5 = "${md5(file("../src/Lambda/BookLambda/src/BookLambda/Function.cs"))}"
   }
 
   provisioner "local-exec" {
-    command = "dotnet lambda package --project-location ../src/Lambda/StudentLambda/src/StudentLambda/ --output-package ../src/Lambda/StudentLambda/src/StudentLambda/bin/StudentLambda.zip"
+    command = "dotnet lambda package --project-location ../src/Lambda/BookLambda/src/BookLambda/ --output-package ../src/Lambda/BookLambda/src/BookLambda/bin/Release/net8.0/publish/BookLambda.zip"
   }
 }
 
-data "local_file" "StudentLambda" {
-  filename   = "../src/Lambda/StudentLambda/src/StudentLambda/bin/StudentLambda.zip"
-  depends_on = [null_resource.lambda_build]
+data "local_file" "BookLambda" {
+  filename   = "../src/Lambda/BookLambda/src/BookLambda/bin/Release/net8.0/publish/BookLambda.zip"
+  depends_on = [null_resource.package_book_lambda]
 }
 
-resource "aws_lambda_function" "student_function" {
-  filename         = data.local_file.StudentLambda.filename
-  source_code_hash = data.local_file.StudentLambda.content_base64sha256
-  function_name    = "StudentLambda"
+resource "aws_lambda_function" "get_books" {
+  filename         = data.local_file.BookLambda.filename
+  source_code_hash = data.local_file.BookLambda.content_base64sha256
+  function_name    = "GetBooks"
   role             = "arn:aws:iam::194722443726:role/lambda-administrator-role"
-  handler          = "StudentLambda::StudentLambda.Function::FunctionHandler"
+  handler          = "BookLambda::BookLambda.Function::GetBooks"
   runtime          = "dotnet8"
-  depends_on       = [null_resource.lambda_build]
+  timeout          = "30"
+
+  vpc_config {
+    ipv6_allowed_for_dual_stack = "false"
+    security_group_ids          = [aws_security_group.rds_sg.id]
+    subnet_ids                  = data.aws_subnets.default.ids
+  }
+
+  environment {
+    variables = {
+      connectionstring = var.db_connectionstring
+    }
+  }
+
+  depends_on = [data.local_file.BookLambda]
 }
-*/
