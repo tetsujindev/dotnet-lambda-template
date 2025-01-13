@@ -77,7 +77,7 @@ variable "db_password" {
   sensitive = true
 }
 
-resource "aws_db_instance" "tfer--db-instance-postgresql" {
+resource "aws_db_instance" "db-instance-postgresql" {
   allocated_storage                   = "20"
   auto_minor_version_upgrade          = "false"
   availability_zone                   = "ap-northeast-1d"
