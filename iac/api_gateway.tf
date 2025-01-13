@@ -19,7 +19,7 @@ resource "aws_api_gateway_method" "get" {
   rest_api_id      = aws_api_gateway_rest_api.root.id
 }
 
-resource "aws_api_gateway_integration" "get_all_students_async" {
+resource "aws_api_gateway_integration" "get_books" {
   http_method             = "GET"
   integration_http_method = "POST"
   resource_id             = aws_api_gateway_resource.books.id
@@ -28,12 +28,12 @@ resource "aws_api_gateway_integration" "get_all_students_async" {
   uri                     = aws_lambda_function.get_books.invoke_arn
 }
 /*
-resource "aws_api_gateway_integration_response" "get_all_students_async_200" {
+resource "aws_api_gateway_integration_response" "get_books_200" {
   http_method = "GET"
-  resource_id = aws_api_gateway_resource.students.id
+  resource_id = aws_api_gateway_resource.books.id
   rest_api_id = aws_api_gateway_rest_api.root.id
   status_code = "200"
-  depends_on = [ aws_api_gateway_integration.get_all_students_async ]
+  depends_on = [ aws_api_gateway_integration.get_books ]
 }
 */
 resource "aws_api_gateway_method_response" "get_books_200" {
@@ -46,7 +46,7 @@ resource "aws_api_gateway_method_response" "get_books_200" {
 
   rest_api_id = aws_api_gateway_rest_api.root.id
   status_code = "200"
-  depends_on = [ aws_api_gateway_integration.get_all_students_async ]
+  depends_on = [ aws_api_gateway_integration.get_books ]
 }
 
 resource "aws_api_gateway_deployment" "default" {
@@ -55,9 +55,9 @@ resource "aws_api_gateway_deployment" "default" {
   triggers = {
     redeployment = sha1(jsonencode([
       aws_api_gateway_rest_api.root.body,
-      //aws_api_gateway_resource.students,
+      //aws_api_gateway_resource.books,
       //aws_api_gateway_method.get,
-      //aws_api_gateway_integration.get_all_students_async,
+      //aws_api_gateway_integration.get_books,
     ]))
   }
 
@@ -65,7 +65,7 @@ resource "aws_api_gateway_deployment" "default" {
     create_before_destroy = true
   }
 
-  depends_on = [ aws_api_gateway_integration.get_all_students_async ]
+  depends_on = [ aws_api_gateway_integration.get_books ]
 }
 
 resource "aws_api_gateway_stage" "default" {
