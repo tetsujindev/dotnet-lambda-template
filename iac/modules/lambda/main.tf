@@ -38,7 +38,7 @@ data "aws_subnets" "default" {
 resource "aws_lambda_function" "get_books" {
   filename         = data.local_file.BookLambda.filename
   source_code_hash = data.local_file.BookLambda.content_base64sha256
-  function_name    = "GetBooks"
+  function_name    = var.function_name
   role             = "arn:aws:iam::194722443726:role/lambda-administrator-role"
   handler          = "BookLambda::BookLambda.Function::GetBooks"
   runtime          = "dotnet8"
