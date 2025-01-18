@@ -52,7 +52,11 @@ public class SimpleNotificationServiceMessageForChatbotModel(string messageText)
 
     public class ContentObject(string description)
     {
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = "タイトルだよ";
         [JsonPropertyName("description")]
         public string Description { get; set; } = description;
+        [JsonPropertyName("nextSteps")]
+        public string[] NextSteps { get; set; } = ["次のステップ1", "次のステップ2"];
     }
 }
