@@ -17,6 +17,7 @@ public class Function
     private readonly SecretsManagerService secretsManagerService;
     private readonly BookRepository bookRepository;
     private readonly SqsService sqsService;
+    private readonly StepFunctionsService stepFunctionsService;
 
     public Function()
     {
@@ -25,6 +26,7 @@ public class Function
         //bookRepository = new BookRepository(secretsManagerService.GetSecretAsync<string>("connectionstring").Result);
         bookRepository = new BookRepository(Environment.GetEnvironmentVariable("connectionstring")!);
         sqsService = new SqsService();
+        stepFunctionsService = new StepFunctionsService();
     }
 
     public string FunctionHandler(string input, ILambdaContext context)
@@ -53,12 +55,13 @@ public class Function
         };
     }
 
-    public void SendBookFromQueueToStepFunction(SQSEvent sqsEvent, ILambdaContext context)
+    public async Task SendBookFromQueueToStepFunction(SQSEvent sqsEvent, ILambdaContext context)
     {
         foreach (var record in sqsEvent.Records)
         {
             var book = JsonSerializer.Deserialize<Book>(record.Body);
             context.Logger.LogLine($"Processing book {book.Id} {book.Title} {book.Author}");
+            await stepFunctionsService.StartExecutionAsync("arn:aws:states:ap-northeast-1:194722443726:stateMachine:BookStateMachine", book);
         }
     }
 }
