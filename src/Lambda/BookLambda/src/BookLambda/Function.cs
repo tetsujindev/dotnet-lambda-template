@@ -47,7 +47,7 @@ public class Function
 
     public async Task<APIGatewayProxyResponse> AddBook(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        var book = new Book("6", "Three Body", "Liu Cixin");
+        var book = new Book("7", "三体", "劉慈欣");
         await sqsService.SendMessageAsync("https://sqs.ap-northeast-1.amazonaws.com/194722443726/BookQueue", book);
         return new APIGatewayProxyResponse
         {
@@ -63,5 +63,10 @@ public class Function
             context.Logger.LogLine($"Processing book {book.Id} {book.Title} {book.Author}");
             await stepFunctionsService.StartExecutionAsync("arn:aws:states:ap-northeast-1:194722443726:stateMachine:BookStateMachine", book);
         }
+    }
+
+    public async Task AddBookToDatabase(Book book, ILambdaContext context)
+    {
+        await bookRepository.AddBookAsync(book);
     }
 }
