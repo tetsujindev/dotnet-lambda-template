@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.400.77" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.82" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.400.82" />
     <PackageReference Include="AWSXRayRecorder.Handlers.EntityFramework" Version="1.6.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
   </ItemGroup>

@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.SQSEvents;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
+using Domain.Models;
 using Infrastructure.Data;
 using Infrastructure.Models;
 using Infrastructure.Services;
@@ -14,6 +16,7 @@ public class Function
 {
     private readonly SecretsManagerService secretsManagerService;
     private readonly BookRepository bookRepository;
+    private readonly SqsService sqsService;
 
     public Function()
     {
@@ -21,6 +24,7 @@ public class Function
         secretsManagerService = new SecretsManagerService();
         //bookRepository = new BookRepository(secretsManagerService.GetSecretAsync<string>("connectionstring").Result);
         bookRepository = new BookRepository(Environment.GetEnvironmentVariable("connectionstring")!);
+        sqsService = new SqsService();
     }
 
     public string FunctionHandler(string input, ILambdaContext context)
@@ -41,9 +45,20 @@ public class Function
 
     public async Task<APIGatewayProxyResponse> AddBook(APIGatewayProxyRequest request, ILambdaContext context)
     {
+        var book = new Book("6", "Three Body", "Liu Cixin");
+        await sqsService.SendMessageAsync("https://sqs.ap-northeast-1.amazonaws.com/194722443726/BookQueue", book);
         return new APIGatewayProxyResponse
         {
             StatusCode = 204
         };
+    }
+
+    public void SendBookFromQueueToStepFunction(SQSEvent sqsEvent, ILambdaContext context)
+    {
+        foreach (var record in sqsEvent.Records)
+        {
+            var book = JsonSerializer.Deserialize<Book>(record.Body);
+            context.Logger.LogLine($"Processing book {book.Id} {book.Title} {book.Author}");
+        }
     }
 }
