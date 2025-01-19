@@ -14,7 +14,7 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseNpgsql(connectionString).AddXRayInterceptor(true);
     }
 
     public DbSet<BookDataModel>? Books { get; set; }

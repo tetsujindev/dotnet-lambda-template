@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
+using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Infrastructure.Data;
 using Infrastructure.Services;
 
@@ -15,6 +16,7 @@ public class Function
 
     public Function()
     {
+        AWSSDKHandler.RegisterXRayForAllServices();
         secretsManagerService = new SecretsManagerService();
         //bookRepository = new BookRepository(secretsManagerService.GetSecretAsync<string>("connectionstring").Result);
         bookRepository = new BookRepository(Environment.GetEnvironmentVariable("connectionstring")!);
