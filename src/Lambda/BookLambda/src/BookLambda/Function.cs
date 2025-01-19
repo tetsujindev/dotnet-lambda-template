@@ -3,6 +3,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Infrastructure.Data;
+using Infrastructure.Models;
 using Infrastructure.Services;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -35,6 +36,14 @@ public class Function
             Body = JsonSerializer.Serialize(books),
             StatusCode = 200,
             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+        };
+    }
+
+    public async Task<APIGatewayProxyResponse> AddBook(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        return new APIGatewayProxyResponse
+        {
+            StatusCode = 204
         };
     }
 }
