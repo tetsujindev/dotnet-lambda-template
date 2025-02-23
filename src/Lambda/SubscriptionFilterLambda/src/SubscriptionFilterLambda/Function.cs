@@ -1,6 +1,7 @@
 using Amazon.Lambda.Core;
 using Infrastructure.Services;
 using Infrastructure.Models;
+using System.Text.Json;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -33,7 +34,15 @@ public class Function
 
     public async Task PublishFromSubscriptionFilterToTeamsWebhookAsync(SubsctiptionFilterInputModel input, ILambdaContext context)
     {
-        await teamsWebhookService.SendMessageAsync(input.GetLogMessage());
-        context.Logger.LogInformation(input.GetLogMessage());
+        var logEvents = JsonDocument.Parse(input.GetLogMessage()).RootElement.GetProperty("logEvents");
+        foreach (var logEvent in logEvents.EnumerateArray())
+        {
+            var message = logEvent.GetProperty("message").GetString();
+            
+            if (message != null)
+            {
+                await teamsWebhookService.SendMessageAsync(message);
+            }
+        }
     }
 }

@@ -4,16 +4,10 @@ using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services;
 
-public class TeamsWebhookService
+public class TeamsWebhookService(string teamsWebhookUri)
 {
-    private readonly HttpClient httpClient;
-    private readonly Uri uri;
-
-    public TeamsWebhookService(string teamsWebhookUri)
-    {
-        httpClient = new();
-        uri = new(teamsWebhookUri);
-    }
+    private readonly HttpClient httpClient = new();
+    private readonly Uri uri = new(teamsWebhookUri);
 
     public async Task SendMessageAsync(string message)
     {
