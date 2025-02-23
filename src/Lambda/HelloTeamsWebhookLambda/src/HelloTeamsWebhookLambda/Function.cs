@@ -22,10 +22,27 @@ public class Function
 
     public async Task<string> FunctionHandler(string input, ILambdaContext context)
     {
-        var bodyItem = new BodyItem() { Type = "TextBlock", Text = "Hello from Lambda??" };
-        var content = new ContentClass() { Schema = "http://adaptivecards.io/schemas/adaptive-card.json", Type = "AdaptiveCard", Version = "1.4", Body = new List<BodyItem>() { bodyItem } };
-        var attachment = new Attachment() { ContentType = "application/vnd.microsoft.card.adaptive", ContentUrl = null, Content = content };
-        var teasmWebhookBody = new TeasmWebhookBody() { Type = "message", Attachments = new List<Attachment>() { attachment } };
+        var teasmWebhookBody = new TeasmWebhookBody()
+        {
+            Type = "message",
+            Attachments = new List<Attachment>() {
+                new Attachment() {
+                    ContentType = "application/vnd.microsoft.card.adaptive",
+                    ContentUrl = null,
+                    Content = new ContentClass() {
+                        Schema = "http://adaptivecards.io/schemas/adaptive-card.json",
+                        Type = "AdaptiveCard",
+                        Version = "1.4",
+                        Body = new List<BodyItem>() {
+                            new BodyItem() {
+                                Type = "TextBlock",
+                                Text = "Hello from Lambda??"
+                            }
+                        }
+                    }
+                }
+            }
+        };
         var json = JsonSerializer.Serialize<TeasmWebhookBody>(teasmWebhookBody);
 
         var request = new HttpRequestMessage
