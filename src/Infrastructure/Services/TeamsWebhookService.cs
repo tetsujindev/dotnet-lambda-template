@@ -31,7 +31,8 @@ public class TeamsWebhookService
                         Body = [
                             new() {
                                 Type = "TextBlock",
-                                Text = message
+                                Text = message,
+                                Wrap = true
                             }
                         ]
                     }
@@ -86,6 +87,8 @@ public class TeasmWebhookBody
                 public required string Type { get; set; }
                 [JsonPropertyName("text")]
                 public required string Text { get; set; }
+                [JsonPropertyName("wrap")]
+                public bool Wrap { get; set; }
             }
         }
     }

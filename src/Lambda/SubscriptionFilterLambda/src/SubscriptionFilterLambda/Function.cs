@@ -34,5 +34,6 @@ public class Function
     public async Task PublishFromSubscriptionFilterToTeamsWebhookAsync(SubsctiptionFilterInputModel input, ILambdaContext context)
     {
         await teamsWebhookService.SendMessageAsync(input.GetLogMessage());
+        context.Logger.LogInformation(input.GetLogMessage());
     }
 }
