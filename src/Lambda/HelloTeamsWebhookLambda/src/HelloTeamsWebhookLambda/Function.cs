@@ -3,6 +3,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Amazon.Lambda.Core;
+using static HelloTeamsWebhookLambda.TeasmWebhookBody;
+using static HelloTeamsWebhookLambda.TeasmWebhookBody.Attachment;
+using static HelloTeamsWebhookLambda.TeasmWebhookBody.Attachment.ContentClass;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -19,8 +22,8 @@ public class Function
 
     public async Task<string> FunctionHandler(string input, ILambdaContext context)
     {
-        var bodyItem = new BodyItem() { Type = "TextBlock", Text = "Hello from Lambda!!" };
-        var content = new Content() { Schema = "http://adaptivecards.io/schemas/adaptive-card.json", Type = "AdaptiveCard", Version = "1.4", Body = new List<BodyItem>() { bodyItem } };
+        var bodyItem = new BodyItem() { Type = "TextBlock", Text = "Hello from Lambda??" };
+        var content = new ContentClass() { Schema = "http://adaptivecards.io/schemas/adaptive-card.json", Type = "AdaptiveCard", Version = "1.4", Body = new List<BodyItem>() { bodyItem } };
         var attachment = new Attachment() { ContentType = "application/vnd.microsoft.card.adaptive", ContentUrl = null, Content = content };
         var teasmWebhookBody = new TeasmWebhookBody() { Type = "message", Attachments = new List<Attachment>() { attachment } };
         var json = JsonSerializer.Serialize<TeasmWebhookBody>(teasmWebhookBody);
@@ -33,7 +36,7 @@ public class Function
         };
 
         var response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode(); 
+        response.EnsureSuccessStatusCode();
 
         return input.ToUpper();
     }
@@ -45,34 +48,34 @@ public class TeasmWebhookBody
     public required string Type { get; set; }
     [JsonPropertyName("attachments")]
     public required List<Attachment> Attachments { get; set; }
-}
 
-public class Attachment
-{
-    [JsonPropertyName("contentType")]
-    public required string ContentType { get; set; }
-    [JsonPropertyName("contentUrl")]
-    public string? ContentUrl { get; set; }
-    [JsonPropertyName("content")]
-    public required Content Content { get; set; }
-}
+    public class Attachment
+    {
+        [JsonPropertyName("contentType")]
+        public required string ContentType { get; set; }
+        [JsonPropertyName("contentUrl")]
+        public string? ContentUrl { get; set; }
+        [JsonPropertyName("content")]
+        public required ContentClass Content { get; set; }
 
-public class Content
-{
-    [JsonPropertyName("$schema")]
-    public required string Schema { get; set; }
-    [JsonPropertyName("type")]
-    public required string Type { get; set; }
-    [JsonPropertyName("version")]
-    public required string Version { get; set; }
-    [JsonPropertyName("body")]
-    public required List<BodyItem> Body { get; set; }
-}
+        public class ContentClass
+        {
+            [JsonPropertyName("$schema")]
+            public required string Schema { get; set; }
+            [JsonPropertyName("type")]
+            public required string Type { get; set; }
+            [JsonPropertyName("version")]
+            public required string Version { get; set; }
+            [JsonPropertyName("body")]
+            public required List<BodyItem> Body { get; set; }
 
-public class BodyItem
-{
-    [JsonPropertyName("type")]
-    public required string Type { get; set; }
-    [JsonPropertyName("text")]
-    public required string Text { get; set; }
+            public class BodyItem
+            {
+                [JsonPropertyName("type")]
+                public required string Type { get; set; }
+                [JsonPropertyName("text")]
+                public required string Text { get; set; }
+            }
+        }
+    }
 }
