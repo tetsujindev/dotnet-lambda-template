@@ -25,23 +25,23 @@ public class Function
         var teasmWebhookBody = new TeasmWebhookBody()
         {
             Type = "message",
-            Attachments = new List<Attachment>() {
-                new Attachment() {
+            Attachments = [
+                new() {
                     ContentType = "application/vnd.microsoft.card.adaptive",
                     ContentUrl = null,
                     Content = new ContentClass() {
                         Schema = "http://adaptivecards.io/schemas/adaptive-card.json",
                         Type = "AdaptiveCard",
                         Version = "1.4",
-                        Body = new List<BodyItem>() {
-                            new BodyItem() {
+                        Body = [
+                            new() {
                                 Type = "TextBlock",
                                 Text = "Hello from Lambda??"
                             }
-                        }
+                        ]
                     }
                 }
-            }
+            ]
         };
         var json = JsonSerializer.Serialize<TeasmWebhookBody>(teasmWebhookBody);
 
