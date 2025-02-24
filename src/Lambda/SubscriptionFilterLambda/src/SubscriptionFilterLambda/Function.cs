@@ -18,15 +18,8 @@ public class Function
 
     public async Task PublishFromSubscriptionFilterToTeamsWebhookAsync(SubsctiptionFilterInputModel input, ILambdaContext context)
     {
-        var logEvents = JsonDocument.Parse(input.GetLogMessage()).RootElement.GetProperty("logEvents");
-        foreach (var logEvent in logEvents.EnumerateArray())
-        {
-            var message = logEvent.GetProperty("message").GetString();
-
-            if (message != null)
-            {
-                await teamsWebhookService.SendMessageAsync(message);
-            }
-        }
+        var logInfo = input.GetLogInfo();
+        var message = input.GetMessage();
+        await teamsWebhookService.SendMessageAsync($"{logInfo.LogGroup} {logInfo.LogStream} {message.Level} {message.RequestId} {message.TraceId} {message.Body}");
     }
 }
