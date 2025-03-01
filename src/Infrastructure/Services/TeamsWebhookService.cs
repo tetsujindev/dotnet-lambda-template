@@ -57,12 +57,21 @@ public class TeasmWebhookBody
     {
         var encodedLogGroup = HttpUtility.UrlEncode(HttpUtility.UrlEncode(log.LogGroup)).Replace("%", "$");
         var encodedRequestId = HttpUtility.UrlEncode(HttpUtility.UrlEncode($"\"{log.RequestId}\"")).Replace("%", "$");
+        var traceIdRoot = log.TraceId.Split("=")[1].Split(";")[0];
         var cloudWatchLogsUrl = $"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{encodedLogGroup}/log-events$3FfilterPattern$3D{encodedRequestId}";
+        var cloudWatchTraceUrl = $"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#xray:traces/{traceIdRoot}";
 
-        return new AdaptiveCard("1.4")
+        return new AdaptiveCard("1.5")
         {
             Type = "AdaptiveCard",
             Version = "1.4",
+            AdditionalProperties =
+            {
+                ["msteams"] = new Dictionary<string, object>
+                {
+                    ["width"] = "Full"
+                }
+            },
             Body =
             [
                 new AdaptiveTextBlock
@@ -72,6 +81,11 @@ public class TeasmWebhookBody
                     Size = AdaptiveTextSize.Large,
                     Color = AdaptiveTextColor.Attention
                 },
+                new AdaptiveTextBlock
+                {
+                    Type = "TextBlock",
+                    Text = $"エラーログが検知されました。メッセージを確認してください。"
+                },
                 new AdaptiveFactSet
                 {
                     Type = "FactSet",
@@ -79,7 +93,9 @@ public class TeasmWebhookBody
                     {
                         new AdaptiveFact("Level", log.Level),
                         new AdaptiveFact("Log Group", log.LogGroup),
-                        new AdaptiveFact("Request ID", log.RequestId)
+                        new AdaptiveFact("Log Stream", log.LogStream),
+                        new AdaptiveFact("Request ID", log.RequestId),
+                        new AdaptiveFact("Trace ID", log.TraceId)
                     }
                 },
                 new AdaptiveTextBlock
@@ -98,7 +114,14 @@ public class TeasmWebhookBody
                             Type = "Action.OpenUrl",
                             Title = "Open in CloudWatch Logs",
                             Url = new Uri(cloudWatchLogsUrl),
-                            Style = "positive"
+                            Style = "positive",
+                        },
+                        new AdaptiveOpenUrlAction
+                        {
+                            Type = "Action.OpenUrl",
+                            Title = "Open in CloudWatch X-Ray Trace",
+                            Url = new Uri(cloudWatchTraceUrl),
+                            Style = "positive",
                         }
                     }
                 }
