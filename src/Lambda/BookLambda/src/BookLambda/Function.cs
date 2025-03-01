@@ -36,13 +36,19 @@ public class Function
 
     public async Task<APIGatewayProxyResponse> GetBooks(APIGatewayProxyRequest request, ILambdaContext context)
     {
+        context.Logger.LogInformation($"start function {context.FunctionName} with request {JsonSerializer.Serialize(request)}");
+
         var books = await bookRepository.GetBooksAsync();
-        return new APIGatewayProxyResponse
+
+        var response = new APIGatewayProxyResponse
         {
             Body = JsonSerializer.Serialize(books),
             StatusCode = 200,
             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
         };
+
+        context.Logger.LogInformation($"end function {context.FunctionName} with response {JsonSerializer.Serialize(response)}");
+        return response;
     }
 
     public async Task<APIGatewayProxyResponse> AddBook(APIGatewayProxyRequest request, ILambdaContext context)
