@@ -7,5 +7,5 @@ public class CloudWatchLogModel
     public required string Level { get; set; }
     public required string RequestId { get; set; }
     public required string TraceId { get; set; }
-    public required string Message { get; set; }
+    public string? Message { get; set; }
 }

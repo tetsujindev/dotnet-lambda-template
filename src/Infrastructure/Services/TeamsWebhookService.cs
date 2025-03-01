@@ -61,10 +61,9 @@ public class TeasmWebhookBody
         var cloudWatchLogsUrl = $"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{encodedLogGroup}/log-events$3FfilterPattern$3D{encodedRequestId}";
         var cloudWatchTraceUrl = $"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#xray:traces/{traceIdRoot}";
 
-        return new AdaptiveCard("1.5")
+        return new AdaptiveCard("1.4")
         {
             Type = "AdaptiveCard",
-            Version = "1.4",
             AdditionalProperties =
             {
                 ["msteams"] = new Dictionary<string, object>
@@ -84,7 +83,7 @@ public class TeasmWebhookBody
                 new AdaptiveTextBlock
                 {
                     Type = "TextBlock",
-                    Text = $"エラーログが検知されました。メッセージを確認してください。"
+                    Text = "対応が必要な問題が検出されました。詳細はログを確認してください。"
                 },
                 new AdaptiveFactSet
                 {
@@ -93,16 +92,25 @@ public class TeasmWebhookBody
                     {
                         new AdaptiveFact("Level", log.Level),
                         new AdaptiveFact("Log Group", log.LogGroup),
-                        new AdaptiveFact("Log Stream", log.LogStream),
+                        //new AdaptiveFact("Log Stream", log.LogStream),
                         new AdaptiveFact("Request ID", log.RequestId),
-                        new AdaptiveFact("Trace ID", log.TraceId)
+                        //new AdaptiveFact("Trace ID", log.TraceId)
                     }
                 },
-                new AdaptiveTextBlock
+                new AdaptiveContainer
                 {
-                    Type = "TextBlock",
-                    Text = log.Message,
-                    Wrap = true
+                    Type = "Container",
+                    Style = AdaptiveContainerStyle.Attention,
+                    Items =
+                    {
+                        new AdaptiveTextBlock
+                        {
+                            Type = "TextBlock",
+                            Text = log.Message ?? "",
+                            Wrap = true,
+                            Color = AdaptiveTextColor.Attention
+                        }
+                    }
                 },
                 new AdaptiveActionSet
                 {

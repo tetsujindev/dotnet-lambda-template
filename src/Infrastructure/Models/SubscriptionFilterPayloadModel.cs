@@ -43,7 +43,7 @@ public class SubscriptionFilterPayloadModel
                 Level = message.Level,
                 RequestId = message.RequestId,
                 TraceId = message.TraceId,
-                Message = message.Message
+                Message = message.Message ?? message.ErrorMessage
             });
         }
 
@@ -77,6 +77,8 @@ public class SubscriptionFilterPayloadModel
         [JsonPropertyName("level")]
         public required string Level { get; set; }
         [JsonPropertyName("message")]
-        public required string Message { get; set; }
+        public string? Message { get; set; }
+        [JsonPropertyName("errorMessage")]
+        public string? ErrorMessage { get; set; }
     }
 }
