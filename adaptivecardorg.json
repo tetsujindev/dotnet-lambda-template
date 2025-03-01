@@ -1,0 +1,21 @@
+{
+    "type": "message",
+    "attachments": [
+        {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "contentUrl": null,
+            "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [
+                    {
+                        "type": "TextBlock",
+                        "text": "/aws/lambda/myEmptyFunction 2025/03/01/myEmptyFunction[$LATEST]6d5759ea43a94b29be2a65f88e7e359e Information 0dd7d5fe-17ba-43ff-96e9-1eeef76728c1 Root=1-67c2b2fd-57a0729f2e396da553a826f7;Parent=62cd85343b189492;Sampled=0;Lineage=1:87460dcb:0 seasongs are {seasons}",
+                        "wrap": true
+                    }
+                ]
+            }
+        }
+    ]
+}

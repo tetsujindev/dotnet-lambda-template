@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AdaptiveCards;
+using Infrastructure.Models;
 
 namespace Infrastructure.Services;
 
@@ -18,21 +20,21 @@ public class TeamsWebhookService(string teamsWebhookUri)
                 new() {
                     ContentType = "application/vnd.microsoft.card.adaptive",
                     ContentUrl = null,
-                    Content = new() {
-                        Schema = "http://adaptivecards.io/schemas/adaptive-card.json",
+                    Content = JsonDocument.Parse(new AdaptiveCard("1.4") {
                         Type = "AdaptiveCard",
                         Version = "1.4",
                         Body = [
-                            new() {
+                            new AdaptiveTextBlock() {
                                 Type = "TextBlock",
                                 Text = message,
                                 Wrap = true
                             }
                         ]
-                    }
+                    }.ToJson())
                 }
             ]
         };
+
         var json = JsonSerializer.Serialize(teasmWebhookBody);
 
         var request = new HttpRequestMessage
@@ -55,6 +57,37 @@ public class TeasmWebhookBody
     [JsonPropertyName("attachments")]
     public required List<Attachment> Attachments { get; set; }
 
+    public static TeasmWebhookBody CreateFromLog(CloudWatchLogModel log)
+    {
+        return new TeasmWebhookBody()
+        {
+            Type = "message",
+            Attachments = [
+                new() {
+                    ContentType = "application/vnd.microsoft.card.adaptive",
+                    ContentUrl = null,
+                    Content = JsonDocument.Parse(new AdaptiveCard("1.4") {
+                        Type = "AdaptiveCard",
+                        Version = "1.4",
+                        Body = [
+                            new AdaptiveTextBlock() {
+                                Type = "TextBlock",
+                                Text = $"{log.Level} Log Detected",
+                                Size = AdaptiveTextSize.Medium,
+                                Color = AdaptiveTextColor.Attention
+                            },
+                            new AdaptiveTextBlock() {
+                                Type = "TextBlock",
+                                Text = log.Message,
+                                Wrap = true
+                            }
+                        ]
+                    }.ToJson())
+                }
+            ]
+        };
+    }
+
     public class Attachment
     {
         [JsonPropertyName("contentType")]
@@ -62,28 +95,6 @@ public class TeasmWebhookBody
         [JsonPropertyName("contentUrl")]
         public string? ContentUrl { get; set; }
         [JsonPropertyName("content")]
-        public required ContentClass Content { get; set; }
-
-        public class ContentClass
-        {
-            [JsonPropertyName("$schema")]
-            public required string Schema { get; set; }
-            [JsonPropertyName("type")]
-            public required string Type { get; set; }
-            [JsonPropertyName("version")]
-            public required string Version { get; set; }
-            [JsonPropertyName("body")]
-            public required List<BodyItem> Body { get; set; }
-
-            public class BodyItem
-            {
-                [JsonPropertyName("type")]
-                public required string Type { get; set; }
-                [JsonPropertyName("text")]
-                public required string Text { get; set; }
-                [JsonPropertyName("wrap")]
-                public bool Wrap { get; set; }
-            }
-        }
+        public required JsonDocument Content { get; set; }
     }
 }

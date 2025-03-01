@@ -1,0 +1,55 @@
+{
+    "type": "message",
+    "attachments": [
+        {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "contentUrl": null,
+            "content": {
+                "Type": "AdaptiveCard",
+                "Version": {
+                    "Major": 1,
+                    "Minor": 4
+                },
+                "MinVersion": null,
+                "FallbackText": null,
+                "Speak": null,
+                "Lang": null,
+                "Title": null,
+                "BackgroundImage": null,
+                "Height": {
+                    "HeightType": 0,
+                    "Unit": null,
+                    "UnitXml": 0
+                },
+                "PixelMinHeight": 0,
+                "Body": [
+                    {
+                        "Spacing": 0,
+                        "Separator": false,
+                        "Speak": null,
+                        "Height": {
+                            "HeightType": 0,
+                            "Unit": null,
+                            "UnitXml": 0
+                        },
+                        "IsVisible": true,
+                        "Type": "TextBlock",
+                        "AdditionalProperties": {},
+                        "Fallback": null,
+                        "InternalID": null,
+                        "Id": null
+                    }
+                ],
+                "Actions": [],
+                "VerticalContentAlignment": 0,
+                "SelectAction": null,
+                "Refresh": null,
+                "Authentication": null,
+                "AdditionalProperties": {},
+                "Fallback": null,
+                "InternalID": null,
+                "Id": null
+            }
+        }
+    ]
+}
