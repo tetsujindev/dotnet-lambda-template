@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Web;
 using AdaptiveCards;
 using Infrastructure.Models;
 
@@ -37,8 +38,27 @@ public class TeasmWebhookBody
     [JsonPropertyName("attachments")]
     public required List<Attachment> Attachments { get; set; }
 
-    private static AdaptiveCard CreateAdaptiveCardFromLog(CloudWatchLogModel log)
+    public static TeasmWebhookBody CreateFromLog(CloudWatchLogModel log)
     {
+        return new TeasmWebhookBody()
+        {
+            Type = "message",
+            Attachments = [
+                new() {
+                    ContentType = "application/vnd.microsoft.card.adaptive",
+                    ContentUrl = null,
+                    Content = JsonDocument.Parse(CreateAdaptiveCardFromLog(log).ToJson())
+                }
+            ]
+        };
+    }
+
+    private static AdaptiveCard CreateAdaptiveCardFromLog(CloudWatchLogModel log, string? region = "ap-northeast-1")
+    {
+        var encodedLogGroup = HttpUtility.UrlEncode(HttpUtility.UrlEncode(log.LogGroup)).Replace("%", "$");
+        var encodedRequestId = HttpUtility.UrlEncode(HttpUtility.UrlEncode($"\"{log.RequestId}\"")).Replace("%", "$");
+        var cloudWatchLogsUrl = $"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{encodedLogGroup}/log-events$3FfilterPattern$3D{encodedRequestId}";
+
         return new AdaptiveCard("1.4")
         {
             Type = "AdaptiveCard",
@@ -57,11 +77,9 @@ public class TeasmWebhookBody
                     Type = "FactSet",
                     Facts =
                     {
+                        new AdaptiveFact("Level", log.Level),
                         new AdaptiveFact("Log Group", log.LogGroup),
-                        new AdaptiveFact("Log Group", log.Level),
-                        new AdaptiveFact("Log Stream", log.LogStream),
-                        new AdaptiveFact("Request ID", log.RequestId),
-                        new AdaptiveFact("Trace ID", log.TraceId)
+                        new AdaptiveFact("Request ID", log.RequestId)
                     }
                 },
                 new AdaptiveTextBlock
@@ -69,6 +87,35 @@ public class TeasmWebhookBody
                     Type = "TextBlock",
                     Text = log.Message,
                     Wrap = true
+                },
+                new AdaptiveActionSet
+                {
+                    Type = "ActionSet",
+                    Actions =
+                    {
+                        new AdaptiveOpenUrlAction
+                        {
+                            Type = "Action.OpenUrl",
+                            Title = "Open in CloudWatch Logs",
+                            Url = new Uri(cloudWatchLogsUrl),
+                            Style = "positive"
+                        }
+                    }
+                }
+            ]
+        };
+    }
+
+    public static TeasmWebhookBody CreateFromText(string text)
+    {
+        return new TeasmWebhookBody()
+        {
+            Type = "message",
+            Attachments = [
+                new() {
+                    ContentType = "application/vnd.microsoft.card.adaptive",
+                    ContentUrl = null,
+                    Content = JsonDocument.Parse(CreateAdaptiveCardFromText(text).ToJson())
                 }
             ]
         };
@@ -87,36 +134,6 @@ public class TeasmWebhookBody
                     Type = "TextBlock",
                     Text = text,
                     Wrap = true
-                }
-            ]
-        };
-    }
-
-    public static TeasmWebhookBody CreateFromLog(CloudWatchLogModel log)
-    {
-        return new TeasmWebhookBody()
-        {
-            Type = "message",
-            Attachments = [
-                new() {
-                    ContentType = "application/vnd.microsoft.card.adaptive",
-                    ContentUrl = null,
-                    Content = JsonDocument.Parse(CreateAdaptiveCardFromLog(log).ToJson())
-                }
-            ]
-        };
-    }
-
-    public static TeasmWebhookBody CreateFromText(string text)
-    {
-        return new TeasmWebhookBody()
-        {
-            Type = "message",
-            Attachments = [
-                new() {
-                    ContentType = "application/vnd.microsoft.card.adaptive",
-                    ContentUrl = null,
-                    Content = JsonDocument.Parse(CreateAdaptiveCardFromText(text).ToJson())
                 }
             ]
         };
