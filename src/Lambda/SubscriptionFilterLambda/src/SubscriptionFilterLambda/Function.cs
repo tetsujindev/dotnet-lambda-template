@@ -21,7 +21,7 @@ public class Function
 
         foreach (var log in logs)
         {
-            await teamsWebhookService.SendMessageAsync($"{log.LogGroup} {log.LogStream} {log.Level} {log.RequestId} {log.TraceId} {log.Message}");
+            await teamsWebhookService.SendLogAsync(log);
         }
     }
 }
