@@ -1,7 +1,6 @@
 using Amazon.Lambda.Core;
 using Infrastructure.Services;
 using Infrastructure.Models;
-using System.Text.Json;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 

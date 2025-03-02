@@ -5,7 +5,6 @@ using Amazon.Lambda.SQSEvents;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Domain.Models;
 using Infrastructure.Data;
-using Infrastructure.Models;
 using Infrastructure.Services;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -36,7 +35,7 @@ public class Function
 
     public async Task<APIGatewayProxyResponse> GetBooks(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        context.Logger.LogInformation("start function {context.FunctionName} with request {@request}", context.FunctionName, request);
+        context.Logger.LogInformation("start function {context.FunctionName} with {@request}", context.FunctionName, request);
 
         var books = await bookRepository.GetBooksAsync();
 
@@ -47,7 +46,7 @@ public class Function
             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
         };
 
-        context.Logger.LogInformation("end function {context.FunctionName} with response {@response}", context.FunctionName, response);
+        context.Logger.LogInformation("end function {context.FunctionName} with {@response}", context.FunctionName, response);
         return response;
     }
 
