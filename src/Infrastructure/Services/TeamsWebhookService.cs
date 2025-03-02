@@ -106,7 +106,7 @@ public class TeasmWebhookBody
                         new AdaptiveTextBlock
                         {
                             Type = "TextBlock",
-                            Text = log.Message ?? "",
+                            Text = log.Message,
                             Wrap = true,
                             Color = AdaptiveTextColor.Attention
                         }

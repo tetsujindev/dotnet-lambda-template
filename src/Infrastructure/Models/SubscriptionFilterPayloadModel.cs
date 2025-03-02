@@ -23,7 +23,7 @@ public class SubscriptionFilterPayloadModel
         using var gzipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
         gzipStream.CopyTo(decompressedStream);
 
-        var data = JsonSerializer.Deserialize<DataObject>(Encoding.UTF8.GetString(decompressedStream.ToArray())) ?? throw new ArgumentNullException(nameof(DataObject));
+        var data = JsonSerializer.Deserialize<DataObject>(Encoding.UTF8.GetString(decompressedStream.ToArray()))!;
         return data;
     }
 
@@ -34,17 +34,16 @@ public class SubscriptionFilterPayloadModel
 
         foreach (var logEvent in data.LogEvents)
         {
-            var message = JsonSerializer.Deserialize<MessageObject>(logEvent.Message) ?? throw new ArgumentNullException(nameof(MessageObject));
+            var message = JsonSerializer.Deserialize<MessageObject>(logEvent.Message)!;
 
-            logs.Add(new CloudWatchLogModel
-            {
-                LogGroup = data.LogGroup,
-                LogStream = data.LogStream,
-                Level = message.Level,
-                RequestId = message.RequestId,
-                TraceId = message.TraceId,
-                Message = message.Message ?? message.ErrorMessage
-            });
+            logs.Add(CloudWatchLogModel.Create(
+                logGroup: data.LogGroup,
+                logStream: data.LogStream,
+                level: message.Level,
+                requestId: message.RequestId,
+                traceId: message.TraceId,
+                message: message.Message,
+                errorMessage: message.ErrorMessage));
         }
 
         return logs;
